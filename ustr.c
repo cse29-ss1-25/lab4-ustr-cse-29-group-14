@@ -57,8 +57,63 @@ removed from the original string.
 Returns the original string if index is out of bounds.
 */
 UStr removeAt(UStr s, int32_t index) {
-	// TODO: implement this
+	
+	//Check if index is valid.
+	if(index<0||index>=s.codepoints){
+		return s;
+	}
+	
+	//Find which index (in terms of bytes) corresponds with the inputted index.
+	int char_count = 0;
+	int byte_index;
+	for(int i =0; i<=s.bytes;i++){
+		if(char_count == index){
+			byte_index=i;
+			break;
+		}
+		char_count++;
+		if(s.contents[i]&0b10000000==0b00000000){
+			continue;
+		}
+		else if(s.contents[i]&0b11100000==0b11000000){
+			i++;
+		}
+		else if(s.contents[i]&0b11110000==0b11100000){
+			i+=2;
+		}
+		else{
+			i+=3;
+		}
+	}
 
+	//Calculating the number of bytes to remove/shift.
+	int bytes_removed=0;
+	if(s.contents[byte_index]&0b10000000==0b00000000){
+		bytes_removed=1;
+	}
+	else if(s.contents[byte_index]&0b11100000==0b11000000){
+		bytes_removed=2;
+	}
+	else if(s.contents[byte_index]&0b11110000==0b11100000){
+		bytes_removed=3;
+	}
+	else{
+		bytes_removed = 4;
+	}
+	
+	//Removing/shifting characters by bytes.
+	char* new_contents = malloc(s.bytes-bytes_removed+1);
+	for(int i =0; i<byte_index; i++){
+		new_contents[i]=s.contents[i];
+	}
+	for(int i = byte_index; i<=s.bytes-bytes_removed;i++){
+		new_contents[i]=s.contents[i+bytes_removed];
+	}
+	
+	//Final product.
+	UStr toReturn = new_ustr(new_contents);
+	free(new_contents);
+	return toReturn;
 }
 
 /*
