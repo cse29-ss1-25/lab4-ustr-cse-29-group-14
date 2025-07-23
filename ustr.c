@@ -36,48 +36,39 @@ and ending at index end (exclusive).
 
 Returns an empty string on invalid range.
 */
-
 UStr substring(UStr s, int32_t start, int32_t end) {
-        // TODO: implement this
-        //sets up the ranges 
-        if (start < 0) start = 0;
-        if (end > s.codepoints) end = s.codepoints;
-        if (start >= end){
-                return new_ustr("");
-        }
+    if (start < 0 || end > s.codepoints || start >= end) {
+        return new_ustr("");
+    }
 
-        //finding starting point from offset
-int32_t cp = 0;
-        char* p = s.contents;
-        while (cp < start)  {
-            int len = utf8_codepoint_size(*p);
+    int32_t cp = 0;
+    char* p = s.contents;
 
-                p += len;
-                cp++;
-        }
-        int byte_start = p - s.contents;
+    while (cp < start) {
+        int len = utf8_codepoint_size(*p);
+        p += len;
+        cp++;
+    }
+    int byte_start = p - s.contents;
 
-        //finding ending point
-        while (cp < end) {
-            int len = utf8_codepoint_size(*p);
+    while (cp < end) {
+        int len = utf8_codepoint_size(*p);
+        p += len;
+        cp++;
+    }
+    int byte_end = p - s.contents;
 
-                p += len;
-                cp++;
-        }
-        int byte_end = p - s.contents;
+    int n = byte_end - byte_start;
+    char* buf = malloc(n + 1);
+    memcpy(buf, s.contents + byte_start, n);
+    buf[n] = '\0';
 
-        //copy bytes
-        int n = byte_end - byte_start;
-        char* buf = malloc(n + 1);
-        memcpy(buf, s.contents + byte_start, n);
-        buf[n] = '\0';
+    UStr result = new_ustr(buf);
+    free(buf);
+    return result;
+}
 
-  UStr result = new_ustr(buf);
-        free(buf);
-        return result;
-}      
-/*
-Given 2 strings s1 and s2, returns a string that is the result of 
+/*Given 2 strings s1 and s2, returns a string that is the result of 
 concatenating s1 and s2. 
 */
 UStr concat(UStr s1, UStr s2) {
