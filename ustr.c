@@ -94,13 +94,13 @@ UStr removeAt(UStr s, int32_t index) {
 			break;
 		}
 		char_count++;
-		if(s.contents[i]&0b10000000==0b00000000){
+		if((s.contents[i]&0b10000000)==0b00000000){
 			continue;
 		}
-		else if(s.contents[i]&0b11100000==0b11000000){
+		else if((s.contents[i]&0b11100000)==0b11000000){
 			i++;
 		}
-		else if(s.contents[i]&0b11110000==0b11100000){
+		else if((s.contents[i]&0b11110000)==0b11100000){
 			i+=2;
 		}
 		else{
@@ -110,13 +110,13 @@ UStr removeAt(UStr s, int32_t index) {
 
 	//Calculating the number of bytes to remove/shift.
 	int bytes_removed=0;
-	if(s.contents[byte_index]&0b10000000==0b00000000){
+	if((s.contents[byte_index]&0b10000000)==0b00000000){
 		bytes_removed=1;
 	}
-	else if(s.contents[byte_index]&0b11100000==0b11000000){
+	else if((s.contents[byte_index]&0b11100000)==0b11000000){
 		bytes_removed=2;
 	}
-	else if(s.contents[byte_index]&0b11110000==0b11100000){
+	else if((s.contents[byte_index]&0b11110000)==0b11100000){
 		bytes_removed=3;
 	}
 	else{
