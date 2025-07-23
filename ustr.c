@@ -47,10 +47,11 @@ UStr substring(UStr s, int32_t start, int32_t end) {
         }
 
         //finding starting point from offset
-        int32_t cp = 0;
-        char p = s.contents;
-        while (cp < start) {
-                int len = utf8_char_len(p);
+int32_t cp = 0;
+        char* p = s.contents;
+        while (cp < start)  {
+            int len = utf8_codepoint_size(*p);
+
                 p += len;
                 cp++;
         }
@@ -58,7 +59,8 @@ UStr substring(UStr s, int32_t start, int32_t end) {
 
         //finding ending point
         while (cp < end) {
-                int len = utf8_char_len(p);
+            int len = utf8_codepoint_size(*p);
+
                 p += len;
                 cp++;
         }
@@ -66,7 +68,7 @@ UStr substring(UStr s, int32_t start, int32_t end) {
 
         //copy bytes
         int n = byte_end - byte_start;
-        charbuf = malloc(n + 1);
+        char* buf = malloc(n + 1);
         memcpy(buf, s.contents + byte_start, n);
         buf[n] = '\0';
 
