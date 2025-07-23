@@ -88,11 +88,29 @@ Given a string s, return s reversed.
 
 Example: reverse("apples🍎 and bananas🍌") = "🍌sananab dna 🍎selppa")
 */
+
 UStr reverse(UStr s) {
-	// TODO: implement this
+    char* reversed = malloc(s.bytes + 1);
+    int write_index = 0;
+    int i = s.bytes - 1;
 
+    while (i >= 0) {
+        int start = i;
+        while (start > 0 && (s.contents[start] & 0xC0) == 0x80) {
+            start--;
+        }
+        int len = i - start + 1;
+        for (int j = 0; j < len; j++) {
+            reversed[write_index++] = s.contents[start + j];
+        }
+        i = start - 1;
+    }
+
+    reversed[write_index] = '\0';
+    UStr result = new_ustr(reversed);
+    free(reversed);
+    return result;
 }
-
 
 void print_ustr(UStr s) {
 	printf("%s [codepoints: %d | bytes: %d]", s.contents, s.codepoints, s.bytes);
