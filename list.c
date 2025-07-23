@@ -45,8 +45,40 @@ Expands the list's capacity if necessary (double the capacity, or set to 1 if 0)
 Returns 1 on success, 0 if the index is invalid (out of bounds).
 */
 int8_t insert(List* list, UStr s, int32_t index) {
-    // TODO: implement this
+	if (index < 0 || index > list->size) {
+		return 0;
+	}
 
+	if (list->size == list->capacity) {
+		int32_t new_capacity = list->capacity;
+		if (new_capacity == 0) {
+			new_capacity = 1;
+		} else {
+			new_capacity *= 2;
+		}
+
+		UStr* new_data = calloc (new_capacity, sizeof(UStr));
+
+		if (new_data == NULL) {
+			return 0;
+		}
+
+		for (int32_t i = 0; i < list->size; i++) {
+			new_data[i] = list->data[i];
+		}
+
+		free(list->data);
+		list->data = new_data;
+		list->capacity = new_capacity;
+	}
+
+	for (int32_t i = list->size; i > index; i--) {
+		list->data[i] = list->data[i - 1];
+	}
+
+	list->data[index] = s;
+	list->size++;
+	return 1;
 }
 
 /*
