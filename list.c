@@ -87,8 +87,16 @@ Removes the element at the given index and shifts all subsequent elements left.
 Returns 1 on success, 0 if the index is invalid (out of bounds).
 */
 int8_t listRemoveAt(List* list, int32_t index) {
-    // TODO: implement this
-
+	if(index<0||index>=list->size){
+		return 0;
+	}
+	UStr removed = list->data[index];
+	for(int i = index; i<list->size;i++){
+		list->data[i]=list->data[i+1];
+	}
+	list->size--;
+	free_ustr(removed);
+	return 1;
 }
 
 /*
