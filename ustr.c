@@ -36,11 +36,44 @@ and ending at index end (exclusive).
 
 Returns an empty string on invalid range.
 */
+
 UStr substring(UStr s, int32_t start, int32_t end) {
-	// TODO: implement this
+        // TODO: implement this
+        //sets up the ranges 
+        if (start < 0) start = 0;
+        if (end > s.codepoints) end = s.codepoints;
+        if (start >= end){
+                return new_ustr("");
+        }
 
-}
+        //finding starting point from offset
+        int32_t cp = 0;
+        char p = s.contents;
+        while (cp < start) {
+                int len = utf8_char_len(p);
+                p += len;
+                cp++;
+        }
+        int byte_start = p - s.contents;
 
+        //finding ending point
+        while (cp < end) {
+                int len = utf8_char_len(p);
+                p += len;
+                cp++;
+        }
+        int byte_end = p - s.contents;
+
+        //copy bytes
+        int n = byte_end - byte_start;
+        charbuf = malloc(n + 1);
+        memcpy(buf, s.contents + byte_start, n);
+        buf[n] = '\0';
+
+  UStr result = new_ustr(buf);
+        free(buf);
+        return result;
+}      
 /*
 Given 2 strings s1 and s2, returns a string that is the result of 
 concatenating s1 and s2. 
