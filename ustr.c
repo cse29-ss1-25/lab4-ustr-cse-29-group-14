@@ -47,10 +47,11 @@ UStr substring(UStr s, int32_t start, int32_t end) {
         }
 
         //finding starting point from offset
-        int32_t cp = 0;
-        char p = s.contents;
-        while (cp < start) {
-                int len = utf8_char_len(p);
+int32_t cp = 0;
+        char* p = s.contents;
+        while (cp < start)  {
+            int len = utf8_codepoint_size(*p);
+
                 p += len;
                 cp++;
         }
@@ -58,7 +59,8 @@ UStr substring(UStr s, int32_t start, int32_t end) {
 
         //finding ending point
         while (cp < end) {
-                int len = utf8_char_len(p);
+            int len = utf8_codepoint_size(*p);
+
                 p += len;
                 cp++;
         }
@@ -66,7 +68,7 @@ UStr substring(UStr s, int32_t start, int32_t end) {
 
         //copy bytes
         int n = byte_end - byte_start;
-        charbuf = malloc(n + 1);
+        char* buf = malloc(n + 1);
         memcpy(buf, s.contents + byte_start, n);
         buf[n] = '\0';
 
@@ -120,29 +122,35 @@ UStr removeAt(UStr s, int32_t index) {
 	
 	//Find which index (in terms of bytes) corresponds with the inputted index.
 	int char_count = 0;
-	int byte_index;
-	for(int i =0; i<=s.bytes;i++){
+	int byte_index = -1;
+	int i = 0;
+	while (i < s.bytes) {	
 		if(char_count == index){
 			byte_index=i;
 			break;
 		}
 		char_count++;
 		if((s.contents[i]&0b10000000)==0b00000000){
-			continue;
-		}
-		else if((s.contents[i]&0b11100000)==0b11000000){
 			i++;
 		}
-		else if((s.contents[i]&0b11110000)==0b11100000){
+		else if((s.contents[i]&0b11100000)==0b11000000){
 			i+=2;
 		}
-		else{
+		else if((s.contents[i]&0b11110000)==0b11100000){
 			i+=3;
 		}
+		else{
+			i+=4;
+		}
+	}
+	
+	if (byte_index == -1) {
+		return s;
 	}
 
 	//Calculating the number of bytes to remove/shift.
 	int bytes_removed=0;
+	
 	if((s.contents[byte_index]&0b10000000)==0b00000000){
 		bytes_removed=1;
 	}
@@ -151,20 +159,22 @@ UStr removeAt(UStr s, int32_t index) {
 	}
 	else if((s.contents[byte_index]&0b11110000)==0b11100000){
 		bytes_removed=3;
+	} 
+	else if((s.contents[byte_index]&0b11111000)==0b11110000){
+		bytes_removed=4;
 	}
 	else{
-		bytes_removed = 4;
+		fprintf(stderr,"Invalid UTF-8 character\n");
+		exit(1);
 	}
 	
 	//Removing/shifting characters by bytes.
-	char* new_contents = malloc(s.bytes-bytes_removed+1);
-	for(int i =0; i<byte_index; i++){
-		new_contents[i]=s.contents[i];
+	int new_size = s.bytes - bytes_removed;
+	char* new_contents = malloc(new_size + 1);
+	for(int j =0; j<byte_index; j++){
+		new_contents[j]=s.contents[j];
 	}
-	for(int i = byte_index; i<=s.bytes-bytes_removed;i++){
-		new_contents[i]=s.contents[i+bytes_removed];
-	}
-	
+	strcpy(new_contents + byte_index, s.contents + byte_index + bytes_removed);
 	//Final product.
 	UStr toReturn = new_ustr(new_contents);
 	free(new_contents);
